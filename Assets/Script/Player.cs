@@ -11,13 +11,16 @@ namespace PlatformShoot
         private float MoveSpeed = 5f, JumpForce = 12f;
         private bool OnJump;
         private MainPanel MyMainPanel;
-        private GameObject mGamePass;
+        public GameObject mGamePass;
+        private GameObject GameLost;
         private void Start()
         {
-            rb = GetComponent<Rigidbody2D>();
+            rb = GetComponent<Rigidbody2D>();//获取角色刚体
             MyMainPanel = GameObject.Find("MainPanel").GetComponent<MainPanel>();//获取MainPanel中的组件MainPanel
-            mGamePass = GameObject.Find("GamePass");
+            mGamePass = GameObject.Find("GamePass");//GamePass对象获取
             mGamePass.SetActive(false);//将GamePass设置为未激活状态
+            GameLost = GameObject.Find("GameLost");
+            GameLost.SetActive(false);
         }
         private void Update()
         {
@@ -26,33 +29,55 @@ namespace PlatformShoot
         }
         private void FixedUpdate()
         {
-            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * MoveSpeed, rb.velocity.y);
             DoMove();
+            IfGameLost();
         }
+        //移动控制的输入
         private void MoveControl()
         {
-            //判断跳跃
+            //判断跳跃按下
             if (Input.GetButtonDown("Jump"))
             {
                 OnJump = true;
             }
         }
+        //进行移动的物理运算
         private void DoMove()
         {
+            //执行跳跃
             if (OnJump == true)
             {
                 rb.velocity = new Vector2(rb.velocity.x, JumpForce);
                 OnJump = false;
             }
+            //移动控制
+            rb.velocity = new Vector2(Input.GetAxisRaw("Horizontal") * MoveSpeed, rb.velocity.y);
+            //玩家朝向
+            float mFace = Input.GetAxisRaw("Horizontal");
+            if (mFace != 0)
+            {
+                //用localScale来修改朝向
+                transform.localScale = new Vector3(mFace, transform.localScale.y, transform.localScale.z);
+            }
+
 
         }
+        //射击子弹
         private void OpenFire()
         {
             if (Input.GetKeyDown(KeyCode.J))
             {
                 var bullet = Resources.Load<GameObject>("Bullet");//加载Resources文件夹内的资源
                 GameObject.Instantiate(bullet, transform.position, Quaternion.identity);//将资源生成到画面内
-                bullet.GetComponent<Bullet>().GetGamePass(mGamePass);
+            }
+        }
+        //游戏结束
+        private void IfGameLost()
+        {
+            if(transform.position.y < -20)
+            {
+                this.gameObject.SetActive(false);//Player设置停用
+                GameLost.SetActive(true);
             }
         }
         private void OnTriggerEnter2D(Collider2D coll)
