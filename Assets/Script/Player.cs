@@ -8,16 +8,16 @@ namespace PlatformShoot
     public class Player : MonoBehaviour
     {
         private Rigidbody2D rb;
-        private float MoveSpeed, JumpForce;
+        private float MoveSpeed = 5f, JumpForce = 12f;
         private bool OnJump;
         private MainPanel MyMainPanel;
-        void Start()
+        private GameObject mGamePass;
+        private void Start()
         {
             rb = GetComponent<Rigidbody2D>();
-            MoveSpeed = 5f;
-            JumpForce = 12f;
-            OnJump = false;
             MyMainPanel = GameObject.Find("MainPanel").GetComponent<MainPanel>();//获取MainPanel中的组件MainPanel
+            mGamePass = GameObject.Find("GamePass");
+            mGamePass.SetActive(false);//将GamePass设置为未激活状态
         }
         private void Update()
         {
@@ -50,9 +50,9 @@ namespace PlatformShoot
         {
             if (Input.GetKeyDown(KeyCode.J))
             {
-                var Bullet = Resources.Load<GameObject>("Bullet");//加载Resources文件夹内的资源
-                GameObject.Instantiate(Bullet, transform.position, Quaternion.identity);//将资源生成到画面内
-
+                var bullet = Resources.Load<GameObject>("Bullet");//加载Resources文件夹内的资源
+                GameObject.Instantiate(bullet, transform.position, Quaternion.identity);//将资源生成到画面内
+                bullet.GetComponent<Bullet>().GetGamePass(mGamePass);
             }
         }
         private void OnTriggerEnter2D(Collider2D coll)
